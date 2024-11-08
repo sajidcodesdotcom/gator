@@ -24,7 +24,7 @@ func main() {
 
 	db, err := sql.Open("postgres", cfg.DBURL)
 	if err != nil {
-    log.Fatalf("Error while opening DB connection: ", err)
+    log.Fatalf("Error while opening DB connection: %s", err)
 	}
   dbQueries := database.New(db)
 
@@ -38,6 +38,8 @@ func main() {
 	}
 	cmds.register("login", loginHandler)
   cmds.register("register", registerHandler)
+  cmds.register("reset", resetHandler)
+  cmds.register("users", getUsersHandler)
 
 	if len(os.Args) < 2 {
 		os.Exit(1)
