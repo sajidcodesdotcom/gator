@@ -128,8 +128,20 @@ func listFeeds(state *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("Error while listing the feeds: %w", err)
 	}
+	if len(feeds) == 0 {
+		fmt.Println("0 feeds found")
+		return nil
+	}
 	fmt.Println("List of feeds stored in the DB")
-	fmt.Println(feeds)
+	fmt.Println("=================================")
+
+	for i, feed := range feeds {
+		fmt.Println(i+1, "___________________")
+		fmt.Printf("* Feed Name:       %s\n", feed.Feedname)
+		fmt.Printf("* Feed URL:       %s\n", feed.Url)
+		fmt.Printf("* Created By:       %s\n", feed.Username)
+
+	}
 
 	return nil
 }

@@ -4,5 +4,5 @@ VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: ListFeeds :many
-SELECT feeds.name, feeds.url, users.name FROM feeds
+SELECT feeds.name AS feedName, feeds.url, users.name AS userName FROM feeds
 INNER JOIN users ON users.id = feeds.user_id;
