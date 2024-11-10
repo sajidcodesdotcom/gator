@@ -73,10 +73,63 @@ func getUsersHandler(state *state, cmd command) error {
 	}
 	for _, val := range users {
 		if state.cfg.CurrentUserName == val.Name {
-		fmt.Println("* " + val.Name + " (current)")
+			fmt.Println("* " + val.Name + " (current)")
 		} else {
-		fmt.Println("* " + val.Name)
-    }
+			fmt.Println("* " + val.Name)
+		}
 	}
+	return nil
+}
+
+func aggHandler(state *state, cmd command) error {
+	// if len(cmd.Args) != 1 {
+	// 	return fmt.Errorf("usage %s <URL>", cmd.Name)
+	// }
+	// url := cmd.Args[0]
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+	fmt.Println(feed)
+	return nil
+}
+
+func addFeedHandler(state *state, cmd command) error {
+	if len(cmd.Args) != 2 {
+		return fmt.Errorf("usage %s <name> <feedURL>", cmd.Name)
+	}
+	// get args [name] and URL and save it in the feeds table.
+	currentUser, err := state.db.GetUser(context.Background(), state.cfg.CurrentUserName)
+	if err != nil {
+		return err
+	}
+	name := cmd.Args[0]
+	url := cmd.Args[1]
+	params := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      name,
+		Url:       url,
+		UserID:    currentUser.ID,
+	}
+	feed, err := state.db.CreateFeed(context.Background(), params)
+	if err != nil {
+		return fmt.Errorf("Error, while creating a feed: %w", err)
+	}
+	fmt.Println("The feed has been successfully created")
+	fmt.Println(feed)
+	return nil
+
+}
+
+func listFeeds(state *state, cmd command) error {
+	feeds, err := state.db.ListFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error while listing the feeds: %w", err)
+	}
+	fmt.Println("List of feeds stored in the DB")
+	fmt.Println(feeds)
+
 	return nil
 }

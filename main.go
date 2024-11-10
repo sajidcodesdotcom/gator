@@ -24,25 +24,27 @@ func main() {
 
 	db, err := sql.Open("postgres", cfg.DBURL)
 	if err != nil {
-    log.Fatalf("Error while opening DB connection: %s", err)
+		log.Fatalf("Error while opening DB connection: %s", err)
 	}
-  dbQueries := database.New(db)
+	dbQueries := database.New(db)
 
 	programState := &state{
 		cfg: &cfg,
-    db: dbQueries,
+		db:  dbQueries,
 	}
 
 	cmds := commands{
 		registerCommands: make(map[string]func(*state, command) error),
 	}
 	cmds.register("login", loginHandler)
-  cmds.register("register", registerHandler)
-  cmds.register("reset", resetHandler)
-  cmds.register("users", getUsersHandler)
+	cmds.register("register", registerHandler)
+	cmds.register("reset", resetHandler)
+	cmds.register("users", getUsersHandler)
+	cmds.register("agg", aggHandler)
+	cmds.register("addfeed", addFeedHandler)
+	cmds.register("feeds", listFeeds)
 
 	if len(os.Args) < 2 {
-		os.Exit(1)
 		fmt.Println("Usage: cli <command> [args...]")
 		return
 	}
