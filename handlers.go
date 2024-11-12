@@ -94,14 +94,9 @@ func aggHandler(state *state, cmd command) error {
 	return nil
 }
 
-func addFeedHandler(state *state, cmd command) error {
+func addFeedHandler(state *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("usage %s <name> <feedURL>", cmd.Name)
-	}
-	// get args [name] and URL and save it in the feeds table.
-	currentUser, err := state.db.GetUser(context.Background(), state.cfg.CurrentUserName)
-	if err != nil {
-		return err
 	}
 	name := cmd.Args[0]
 	url := cmd.Args[1]
@@ -111,7 +106,7 @@ func addFeedHandler(state *state, cmd command) error {
 		UpdatedAt: time.Now().UTC(),
 		Name:      name,
 		Url:       url,
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 	}
 	feed, err := state.db.CreateFeed(context.Background(), params)
 	if err != nil {
@@ -122,7 +117,7 @@ func addFeedHandler(state *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 		FeedID:    feed.ID,
 	})
 	if err != nil {
@@ -130,7 +125,7 @@ func addFeedHandler(state *state, cmd command) error {
 	}
 
 	fmt.Println("Feed created successfully:")
-	printFeed(feed, currentUser)
+	printFeed(feed, user)
 	fmt.Println()
 	fmt.Println("Feed followed successfully:")
 	printFeedFollow(feedFollow.UserName, feedFollow.FeedName)
@@ -139,7 +134,7 @@ func addFeedHandler(state *state, cmd command) error {
 
 }
 
-func listFeeds(state *state, cmd command) error {
+func listFeeds(state *state, cmd command, user database.User) error {
 	feeds, err := state.db.ListFeeds(context.Background())
 	if err != nil {
 		return fmt.Errorf("Error while listing the feeds: %w", err)
@@ -162,15 +157,11 @@ func listFeeds(state *state, cmd command) error {
 	return nil
 }
 
-func followHandler(state *state, cmd command) error {
+func followHandler(state *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
-		return fmt.Errorf("usage %s <name>", cmd.Name)
+		return fmt.Errorf("usage %s <URL>", cmd.Name)
 	}
 	url := cmd.Args[0]
-	user, err := state.db.GetUser(context.Background(), state.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
 	feed, err := state.db.GetFeedByURL(context.Background(), url)
 	if err != nil {
 		return err
@@ -195,7 +186,7 @@ func followHandler(state *state, cmd command) error {
 	return nil
 }
 
-func followingHandler(s *state, cmd command) error {
+func followingHandler(s *state, cmd command, user database.User) error {
 	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
 		return err
@@ -215,6 +206,27 @@ func followingHandler(s *state, cmd command) error {
 	for _, ff := range feedFollows {
 		fmt.Printf("* %s\n", ff.FeedName)
 	}
+
+	return nil
+}
+
+func unFollowHandler(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage %s <feed_URL>", cmd.Name)
+	}
+	feed_url := cmd.Args[0]
+	feed, err := s.db.GetFeedByURL(context.Background(), feed_url)
+	if err != nil {
+		return err
+	}
+	err = s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("Error while deleting the feed: %w", err)
+	}
+	fmt.Println("The feed associated with %s has been deleteed", user.Name)
 
 	return nil
 }
