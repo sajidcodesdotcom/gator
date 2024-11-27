@@ -55,3 +55,5 @@ There are a few other commands you'll you can use as well:
 - `gator feeds` - List all feeds
 - `gator follow <url>` - Follow a feed that already exists in the database
 - `gator unfollow <url>` - Unfollow a feed that already exists in the database
+
+## Contributing
