@@ -1,4 +1,4 @@
-module github.com/sajidcodess/gator
+module github.com/sajidcodesdotcom/gator
 
 go 1.23.2
 
