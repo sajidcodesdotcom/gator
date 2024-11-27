@@ -1,6 +1,6 @@
-# Gator
+# Gator CLI
 
-A multi-player command line tool for aggregating RSS feeds and viewing the posts.
+A multi-player command line tool for aggregating RSS feeds and viewing the posts using pre-defined commands.
 
 ## Installation
 
